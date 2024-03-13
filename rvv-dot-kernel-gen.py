@@ -70,7 +70,7 @@ def rvv071_dot_int8_kernel(output, n_macs, n_lanes, codegen="llvm"):
     ]
     for lane in range(0, n_lanes):
         code += [
-            '    "//vwredsum.vs v4, v8, v0"',
+            '    "//vwredsum.vs v%i, v%i, v0"' % (4+4*lane, 8+4*lane),
             '    ".word 0b001100011%s00000000%s1010111"'
             % (f"{8+4*lane:05b}", f"{4+4*lane:05b}"),
         ]
@@ -83,7 +83,7 @@ def rvv071_dot_int8_kernel(output, n_macs, n_lanes, codegen="llvm"):
     ]
     for lane in range(0, n_lanes):
         code += [
-            '    "//vext.x.v    t4, v4, a4"',
+            '    "//vext.x.v    t4, v%i, a4"' % (4+4*lane),
             '    ".word 0b000011001%s01110010111011010111"' % f"{4+4*lane:05b}",
             '    "//sw          t4, 0(%[outw])"',
             '    ".word 0x01d52023"',
