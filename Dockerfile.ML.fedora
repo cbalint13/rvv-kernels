@@ -1,0 +1,24 @@
+##
+## Example for https://copr.fedorainfracloud.org/coprs/rezso/ML
+##
+
+FROM fedora:40
+
+# copr repositories
+RUN dnf -y install dnf-plugins-core
+RUN dnf -y copr enable rezso/HDL
+
+# fetch updates
+RUN dnf -y update
+
+##
+## Install your package here
+##
+
+# install tools
+RUN dnf -y install glibc32 openssh-clients
+RUN dnf -y install llvm clang riscv64-linux-gnu-gcc
+
+VOLUME "/opt/src/"
+WORKDIR "/opt/src/"
+CMD ["/bin/bash"]
