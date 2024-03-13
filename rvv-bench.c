@@ -108,7 +108,7 @@ int main() {
   printf("RVV bench: %.3f GOPS in %.6f secs\n", (num_ops * n_iters) / 1e9, (double)(usec_elapsed / 1e6));
 
   double ops = ((num_ops * n_iters) / 1e9) / (double)(usec_elapsed / 1e6);
-  printf("RVV speed: %.3f GOPS/sec\n", ops);
+  printf("RVV speed: %.3f GOPS/sec [elems=%i lanes=%i]\n", ops, INT8_MACS, INT32_LANES);
 
   return 0;
 }
