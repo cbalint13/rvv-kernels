@@ -4,11 +4,15 @@
 rm -rf dot_int8_kernel.c objs
 mkdir -p objs
 
-# Generate kernel (C)->(IR)
-./rvv-dot-kernel-gen.py --codegen c --output dot_int8_kernel.c
+##
+## GENERATE
+##
+
+# Generate kernel (C)->(LLVM-IR)
+./rvv-dot-kernel-gen.py --codegen c --elems 32 --lanes 4 --output dot_int8_kernel.c
 clang -c dot_int8_kernel.c -o dot_int8_kernel.ir --target=riscv64-linux-gnu -S -emit-llvm -O3
 
-# Generate kernel (IR)
+# Generate kernel (LLVM-IR)
 #./rvv-dot-kernel-gen.py --codegen llvm --elems 32 --lanes 4 --output dot_int8_kernel.ir
 
 # Remove .srcloc section from IR
@@ -18,6 +22,7 @@ sed -i -e 's|, !srcloc !5||' dot_int8_kernel.ir
 ##
 ## COMPILE
 ##
+
 llc -mtriple=riscv64-unknown-elf -mcpu=generic-rv64 -mattr=+64bit,+a,+c,+d,+f,+m -filetype=obj dot_int8_kernel.ir -o objs/gen-kernel.o
 
 CFLAGS="-Wall -O3 -g -mabi=lp64d -march=rv64gc"
