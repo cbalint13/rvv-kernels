@@ -1,8 +1,8 @@
 
-# High performance RVV kernel generator to C & LLVM-IR dialects
+## High performance RVV kernel generator to C & LLVM-IR dialects
 
 
-## Usage
+### Usage
 
 ```
 $ git clone https://github.com/cbalint13/rvv-kernels
@@ -25,14 +25,14 @@ RVV bench: 25.600 GOPS in 2.215818 secs
 RVV speed: 11.553 GOPS/sec
 ```
 
-## Notes
+### Notes
 
-  * TH1520 implements an older v0.7.1 RVV vector set unsupported by LLVM upstream
-  * THis generator can generate C / LLVM-IR forms of kernel making it RVV version agnostic
-  * TH1520 ```setvli``` ASIC implementation is a very slow, see comments: [trials/riscv-asm.c](trials/riscv-asm.c)
-  * The ```setvli``` issue here force the SVE (scalable vector) concept to avoid freqvent ```setvli``` calls
+  * TH1520 implements an older v0.7.1 RVV vector ISA, unsupported by LLVM upstream
+  * This generator emmits C / LLVM-IR forms of kernel, thus making it RVV version agnostic
+  * TH1520 ```setvli``` ASIC implementation is a slow, see comments: [trials/riscv-asm.c](trials/riscv-asm.c)
+  * The ```setvli``` slowness issue force the SVE (scalable vector) concept to avoid frequent ```setvli``` calls
 
 
-## Changelog
+### Changelog
 
-  * **2024-Mar-13** intial realease, only ```int8``` with v0.7.1 vector version
+  * **2024-Mar-13** intial realease, only ```int8``` with RVV 0.7.1 version
