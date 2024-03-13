@@ -9,7 +9,7 @@ $ git clone https://github.com/cbalint13/rvv-kernels
 $ cd rvv-kernels
 $ docker build --file Dockerfile.ML.fedora --tag th1520-rvv .
 $ docker run -it --rm -v "$PWD":/opt/src th1520-rvv bash
-[root@b8032fd28a75 src]# ./make.sh cbalint@192.168.1.45
+[root@b8032fd28a75 src]# ./make.sh 32 4 cbalint@192.168.1.45
 
 (x) Naive kernel:
   HEX = b0 28 00 00 b0 66 00 00 b0 a4 00 00 b0 e2 00 00

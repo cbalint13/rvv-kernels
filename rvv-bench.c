@@ -5,8 +5,7 @@
 #include <stdint.h>
 #include <sys/time.h>
 
-#define INT8_MACS 32
-#define INT32_LANES 4
+#include "rvv-bench.h"
 
 extern int32_t dot_int8_kernel(int32_t* output, const uint8_t* data, const int8_t* kernel);
 
