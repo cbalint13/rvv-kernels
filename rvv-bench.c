@@ -52,33 +52,30 @@ int main() {
 
   uint8_t data[INT8_MACS];
   int8_t kernel[INT8_MACS*INT32_LANES];
-  int32_t output[INT32_LANES];
+  int32_t output0[INT32_LANES];
+  int32_t output1[INT32_LANES];
 
   uint64_t usec_elapsed;
   struct timeval start, stop;
 
-  // PREPARE DATA
+  // DATA PREPARING
 
   for (size_t i=0; i<INT8_MACS*INT32_LANES; ++i) {
     kernel[i] = i;
     if (i < INT8_MACS) data[i] = i;
-    if (i < INT32_LANES) output[i] = 0;
+    if (i < INT32_LANES) output0[i] = 0;
+    if (i < INT32_LANES) output1[i] = 0;
   }
 
   // SIMULATE
 
   printf("\n");
   printf("(x) Naive kernel:\n");
-  uint64_t num_ops = dot_sim(output, data, kernel);
-  data_dump(output, sizeof(output)/sizeof(uint32_t));
+  uint64_t num_ops = dot_sim(output0, data, kernel);
+  data_dump(output0, sizeof(output0)/sizeof(uint32_t));
 
   printf("\n");
   printf("(x) MACC operations: elems[%i] x lanes[%i] = %lu Ops\n", INT8_MACS, INT32_LANES, num_ops);
-
-  // clear buffer
-  for (size_t i=0; i<INT32_LANES; ++i) {
-    output[i] = 0;
-  }
 
   // BENCHMARK
 
@@ -93,15 +90,22 @@ int main() {
     // benchmark
     gettimeofday(&start,NULL);
     for (uint64_t k=0; k<n_iters; k++) {
-      dot_int8_kernel(output, data, kernel);
+      dot_int8_kernel(output1, data, kernel);
     }
     gettimeofday(&stop,NULL);
 
      printf("(x) RVV kernel:\n");
-    data_dump(output, sizeof(output)/sizeof(uint32_t));
+    data_dump(output1, sizeof(output1)/sizeof(uint32_t));
+  }
+
+  // VALIDATE
+
+  for (size_t i=0; i<INT32_LANES; ++i) {
+    assert(output0[i] == output1[i]);
   }
 
   // STATISTICS
+  
   printf("\n");
   usec_elapsed = (stop.tv_sec - start.tv_sec) * 1e6;
   usec_elapsed += stop.tv_usec - start.tv_usec;

@@ -29,7 +29,7 @@ rm -rf dot_int8_kernel.c rvv-bench.h
 clang -c dot_int8_kernel.c -o dot_int8_kernel.ir --target=riscv64-linux-gnu -S -emit-llvm -O3
 
 # Generate kernel (LLVM-IR)
-#./rvv-dot-kernel-gen.py --codegen llvm --elems $INT8_MACS --lanes $INT8_LANES --output dot_int8_kernel.ir
+#./rvv-dot-kernel-gen.py --codegen llvm --elems $INT8_MACS --lanes $INT32_LANES --output dot_int8_kernel.ir
 
 # Remove .srcloc section from IR
 sed -i -e '/^\!5/d' dot_int8_kernel.ir
@@ -45,8 +45,8 @@ echo "#define INT8_MACS $INT8_MACS" > rvv-bench.h
 echo "#define INT32_LANES $INT32_LANES" >> rvv-bench.h
 
 CFLAGS="-Wall -O3 -g -mabi=lp64d -march=rv64gc"
-riscv64-linux-gnu-gcc -c rvv-bench.c -o objs/rvv-bench.o $CFLAGS
-riscv64-linux-gnu-gcc objs/rvv-bench.o objs/gen-kernel.o -o rvv-bench $CFLAGS
+riscv64-linux-gnu-gcc $CFLAGS -c rvv-bench.c -o objs/rvv-bench.o
+riscv64-linux-gnu-gcc $CFLAGS objs/rvv-bench.o objs/gen-kernel.o -o rvv-bench
 # fixme
 #clang --target=riscv64-unknown-elf -mcpu=generic-rv64 -march=+64bit,+a,+c,+d,+f,+m -mabi=lp64d objs/rvv-bench.o objs/gen-kernel.o -o rvv-bench
 #clang --target=riscv64-linux-gnu -mcpu=generic-rv64 -mabi=lp64d -march=+64bit,+a,+c,+d,+f,+m objs/rvv-bench.o objs/gen-kernel.o -o rvv-bench
@@ -55,6 +55,9 @@ riscv64-linux-gnu-gcc objs/rvv-bench.o objs/gen-kernel.o -o rvv-bench $CFLAGS
 if [ $? -ne 0 ]; then
   exit 0
 fi
+
+# debug
+#riscv64-linux-gnu-objdump --dwarf=decodedline -d rvv-bench | sed -n '/<dot_int8_kernel>:/,/\.\.\./p'
 
 ###
 ### BENCHMARK (remote)

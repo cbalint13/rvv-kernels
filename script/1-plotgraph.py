@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import sys
+import argparse
 import matplotlib
 import numpy as np
 from matplotlib import cm
@@ -16,10 +17,20 @@ def get_cmap(n, name='hsv'):
 
 def main():
 
+  # arguments
+  parser = argparse.ArgumentParser(
+      prog=sys.argv[0],
+      description="Generate performance graph",
+  )
+  parser.add_argument("--logs", help="Logfile", required=True)
+  parser.add_argument("--title", help="Graph Title", required=True)
+
+  args = parser.parse_args()
+
   benchmarks = {}
 
   import json
-  f = open(sys.argv[1], 'r')
+  f = open(args.logs, 'r')
   for line in f.readlines():
     if "speed" in line:
        gops = float(line.split()[2])
@@ -33,10 +44,11 @@ def main():
   cmap = get_cmap(max(benchmarks.keys()) + 1)
 
   plt.figure( figsize = ( 9, 6 ) )
-  plt.title('RVV kernels benchmark')
+  plt.title(args.title)
   plt.xlabel('Elements')
   plt.ylabel('GOP/sec')
   plt.yticks(np.arange(0, 1000, step=2))
+  plt.xticks(np.arange(0, 1000, step=4))
 
   # plot
   for lane in benchmarks.keys():
@@ -46,8 +58,8 @@ def main():
     plt.scatter(lanes, gops, color=cmap(lane))
 
   plt.legend(shadow=True)
-  plt.savefig( "%s.png" % sys.argv[1], format='png', bbox_inches='tight')
-  #plt.show()
+  plt.savefig( "%s.png" % args.logs, format='png', bbox_inches='tight')
+  plt.show()
   plt.close()
 
 if __name__ == "__main__":

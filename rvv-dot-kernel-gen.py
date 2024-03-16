@@ -1,15 +1,23 @@
 #!/usr/bin/python3
 
 import sys
+import math
 import argparse
 
 
 def rvv071_dot_int8_kernel(output, n_macs, n_lanes, codegen="llvm"):
 
-    assert n_macs <= 64
+    assert n_macs <= 32
     assert n_lanes <= 4
     assert n_macs * n_lanes <= 128
     assert codegen in ["llvm", "c"]
+
+    eM = {1:0b00, 2:0b01, 4:0b10, 8:0b11}
+
+    M = [1, 2, 4, 8]
+    # compute multipliers
+    e8m  = M[max(range(len(M)), key=lambda i: ( M[i]-(n_macs / (1024.0 / 8 / 8)) < M[i-1])*i)]
+    e16m = M[max(range(len(M)), key=lambda i: ( M[i]-(n_macs / (1024.0 / 8 / 16)) < M[i-1])*i)]
 
     # Registers Grouping
     # LMUL=2 (m2), instructions with odd register are illegal instructions
@@ -40,8 +48,8 @@ def rvv071_dot_int8_kernel(output, n_macs, n_lanes, codegen="llvm"):
         '    "//li          a5, %i"' % n_lanes,
         '    " .word 0b0000000%s00000000011110010011"' % f"{n_lanes:06b}",
         '    /// load data',
-        '    "//vsetvli     t4, a4, e8, m2, d1"',
-        '    ".word 0x00177ed7"',
+        '    "//vsetvli     t4, a4, e8, m%i, d1"' % e8m,
+        '    ".word 0b00%s01110111111011010111"' % f"{eM[e8m]:02b}",
         '    "//vlbu.v      v2, (%[data])"',
         '    ".word 0x02058107"',
     ]
@@ -65,8 +73,8 @@ def rvv071_dot_int8_kernel(output, n_macs, n_lanes, codegen="llvm"):
     # reduce lanes
     code += [
         '    /// reduce',
-        '    "//vsetvli     t4, a4, e16, m4, d1"',
-        '    ".word 0x00677ed7"',
+        '    "//vsetvli     t4, a4, e16, m%i, d1"' % e16m,
+        '    ".word 0b01%s01110111111011010111"' % f"{eM[e16m]:02b}",
     ]
     for lane in range(0, n_lanes):
         code += [
@@ -78,21 +86,19 @@ def rvv071_dot_int8_kernel(output, n_macs, n_lanes, codegen="llvm"):
     # store lanes
     code += [
         '    /// store',
-        '    "//li          a4, 0"',
-        '    ".half 0x4701"',
     ]
     for lane in range(0, n_lanes):
         code += [
-            '    "//vext.x.v    t4, v%i, a4"' % (4+4*lane),
-            '    ".word 0b000011001%s01110010111011010111"' % f"{4+4*lane:05b}",
+            '    "//vmv.x.s    t4, v%i"' % (4+4*lane),
+            '    ".word 0b000011001%s00000010111011010111"' % f"{4+4*lane:05b}",
             '    "//sw          t4, 0(%[outw])"',
             '    ".word 0x01d52023"',
         ]
         if lane == n_lanes - 1:
             continue
         code += [
-            '    "//add         %[outw], %[outw], a5"',
-            '    ".half 0x953e"',
+            '    "//addi         %[outw], %[outw], 4"',
+            '    ".half 0x0511"',
         ]
 
     # footer
