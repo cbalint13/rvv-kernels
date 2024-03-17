@@ -78,7 +78,7 @@ fi
 ### DEBUG
 ###
 
-riscv64-linux-gnu-objdump --dwarf=decodedline -d rvv-bench | sed -n '/<dot_int8_kernel>:/,/_start/p'
+#riscv64-linux-gnu-objdump --dwarf=decodedline -d rvv-bench | sed -n '/<dot_int8_kernel>:/,/_start/p'
 
 ###
 ### BENCHMARK (remote)
