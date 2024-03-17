@@ -78,7 +78,7 @@ fi
 ### DEBUG
 ###
 
-#riscv64-linux-gnu-objdump --dwarf=decodedline -d rvv-bench | sed -n '/<dot_int8_kernel>:/,/_start/p'
+riscv64-linux-gnu-objdump --dwarf=decodedline -d rvv-bench | sed -n '/<dot_int8_kernel>:/,/_start/p'
 
 ###
 ### BENCHMARK (remote)
@@ -86,7 +86,6 @@ fi
 
 if [ -n "$5" ]
 then
-
   if [ "$5" == "qemu" ]
   then
     qemu-riscv64 -cpu rv64,v=true,vlen=128,vext_spec=v1.0 -L /usr/riscv64-linux-gnu/ rvv-bench 1
