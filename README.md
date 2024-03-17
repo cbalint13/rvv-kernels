@@ -46,7 +46,7 @@ RVV speed: 11.553 GOPS/sec
 [root@b8032fd28a75 src]# ls -l benchmark-int8.log
 -rw-r--r-- 1 1000 1000 5731 Mar 13 17:38 benchmark-int8.log
 
-[root@b8032fd28a75 src]# ./script/1-plotgraph.py --logs benchmark-int8.log --title 'RVV v0.7.1 int8 kernels benchmark'
+[root@b8032fd28a75 src]# ./script/1-plotgraph.py --logs benchmark-int8.log --title 'RVV v0.7.1 int8 kernels benchmark (TH1520)'
 [root@b8032fd28a75 src]# ls -l benchmark-int8.log.png
 -rw-r--r-- 1 1000 1000 58380 Mar 13 18:47 benchmark-int8.log.png
 ```
