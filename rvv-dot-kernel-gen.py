@@ -87,7 +87,7 @@ def rvv_dot_kernel(output, n_macs, n_lanes, datatype="int8", codegen="llvm", vsp
         ]
     elif vspec == "v1.0":
         code += [
-            '    "vsetvli     t4,a4,e16,m4,ta,ma"'# % e16m,
+            '    "vsetvli     t4,a4,e16,m%i,ta,ma"'% e16m,
         ]
     else:
         assert False, "Unsupported vector extension version: `%s`" % vspec
