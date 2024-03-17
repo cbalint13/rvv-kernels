@@ -20,7 +20,7 @@ $ docker build --file Dockerfile.ML.fedora --tag th1520-rvv .
 * Generate a kernel
 ```
 $ docker run -it --rm -v "$PWD":/opt/src th1520-rvv bash
-[root@b8032fd28a75 src]# ./make.sh 32 4 cbalint@192.168.1.45
+[root@b8032fd28a75 src]# ./make.sh 32 4 int8 v0.7.1 cbalint@192.168.1.45
 
 (x) Naive kernel:
   HEX = b0 28 00 00 b0 66 00 00 b0 a4 00 00 b0 e2 00 00
@@ -46,7 +46,7 @@ RVV speed: 11.553 GOPS/sec
 [root@b8032fd28a75 src]# ls -l benchmark-int8.log
 -rw-r--r-- 1 1000 1000 5731 Mar 13 17:38 benchmark-int8.log
 
-[root@b8032fd28a75 src]# ./script/1-plotgraph.py --logs benchmark-int8.log --title 'RVV int8 kernels benchmark'
+[root@b8032fd28a75 src]# ./script/1-plotgraph.py --logs benchmark-int8.log --title 'RVV v0.7.1 int8 kernels benchmark'
 [root@b8032fd28a75 src]# ls -l benchmark-int8.log.png
 -rw-r--r-- 1 1000 1000 58380 Mar 13 18:47 benchmark-int8.log.png
 ```

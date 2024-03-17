@@ -17,7 +17,7 @@ RUN dnf -y update
 
 # install tools
 RUN dnf -y install glibc32 openssh-clients
-RUN dnf -y install llvm clang riscv64-linux-gnu-gcc
+RUN dnf -y install qemu-user llvm clang lld riscv64-linux-gnu-glibc
 RUN dnf -y install python3-matplotlib
 
 VOLUME "/opt/src/"

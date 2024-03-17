@@ -48,15 +48,18 @@ void data_dump(int32_t* output, uint64_t size) {
 
 }
 
-int main() {
+int main(int argc, char **argv) {
 
   uint8_t data[INT8_MACS];
   int8_t kernel[INT8_MACS*INT32_LANES];
   int32_t output0[INT32_LANES];
   int32_t output1[INT32_LANES];
 
+  uint64_t n_iters = 1e8;
   uint64_t usec_elapsed;
   struct timeval start, stop;
+
+  if (argc > 1) n_iters = 1;
 
   // DATA PREPARING
 
@@ -75,12 +78,11 @@ int main() {
   data_dump(output0, sizeof(output0)/sizeof(uint32_t));
 
   printf("\n");
-  printf("(x) MACC operations: elems[%i] x lanes[%i] = %lu Ops\n", INT8_MACS, INT32_LANES, num_ops);
+  printf("(x) MACC operations: elems[%i] x lanes[%i] = %llu Ops\n", INT8_MACS, INT32_LANES, num_ops);
 
   // BENCHMARK
 
   printf("\n");
-  const uint64_t n_iters = 1e8;
   {
     assert(INT8_MACS && INT32_LANES);
     assert(INT8_MACS * 16 <= 1024); // max 64
@@ -105,7 +107,7 @@ int main() {
   }
 
   // STATISTICS
-  
+
   printf("\n");
   usec_elapsed = (stop.tv_sec - start.tv_sec) * 1e6;
   usec_elapsed += stop.tv_usec - start.tv_usec;

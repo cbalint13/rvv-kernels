@@ -5,7 +5,7 @@ import math
 import argparse
 
 
-def rvv071_dot_int8_kernel(output, n_macs, n_lanes, codegen="llvm"):
+def rvv_dot_kernel(output, n_macs, n_lanes, datatype="int8", codegen="llvm", vspec="v0.7.1"):
 
     assert n_macs <= 32
     assert n_lanes <= 4
@@ -43,44 +43,60 @@ def rvv071_dot_int8_kernel(output, n_macs, n_lanes, codegen="llvm"):
     # load data
     code = [
         '    /// init',
-        '    "//li          a4, %i"' % n_macs,
-        '    " .word 0b0000000%s00000000011100010011"' % f"{n_macs:06b}",
-        '    "//li          a5, %i"' % n_lanes,
-        '    " .word 0b0000000%s00000000011110010011"' % f"{n_lanes:06b}",
-        '    /// load data',
-        '    "//vsetvli     t4, a4, e8, m%i, d1"' % e8m,
-        '    ".word 0b00%s01110111111011010111"' % f"{eM[e8m]:02b}",
-        '    "//vlbu.v      v2, (%[data])"',
-        '    ".word 0x02058107"',
+        '    "li          a4, %i"' % n_macs,
+        '    /// load data'
+    ]
+
+    if vspec == "v0.7.1":
+        code += [
+            '    "//vsetvli     t4, a4, e8, m%i, d1"' % e8m,
+            '    ".word 0b00%s01110111111011010111"' % f"{eM[e8m]:02b}",
+        ]
+    elif vspec == "v1.0":
+        code += [
+            '    "vsetvli     t4,a4,e8,m%i,tu,mu"' % e8m
+        ]
+    else:
+        assert False, "Unsupported vector extension version: `%s`" % vspec
+    code += [
+        '    "vle8.v      v4, (%[data])"',
     ]
 
     # multiply lanes
     for lane in range(0, n_lanes):
+        mvec = 16 + e16m * lane
         code += [
             '    /// mul lane %i' % lane,
-            '    "//vlb.v       v4, (%[kern])"',
-            '    ".word 0x12060207"',
-            '    "//vwmulsu.vv  v%i, v4, v2"' % (8 + 4 * lane),
-            '    ".word 0b0011101010010000010010%s1010111"' % f"{8+4*lane:05b}",
+            '    "vle8.v       v8, (%[kern])"',
+            '    "vwmulsu.vv  v%i, v8, v4"' % mvec,
         ]
         if lane == n_lanes - 1:
             continue
         code += [
-            '    "//add         %[kern], %[kern], a4"',
-            '    ".half 0x963a"',
+            '    "add         %[kern], %[kern], a4"',
         ]
 
     # reduce lanes
     code += [
-        '    /// reduce',
-        '    "//vsetvli     t4, a4, e16, m%i, d1"' % e16m,
-        '    ".word 0b01%s01110111111011010111"' % f"{eM[e16m]:02b}",
+        '    /// reduce'
     ]
-    for lane in range(0, n_lanes):
+    if vspec == "v0.7.1":
         code += [
-            '    "//vwredsum.vs v%i, v%i, v0"' % (4+4*lane, 8+4*lane),
-            '    ".word 0b001100011%s00000000%s1010111"'
-            % (f"{8+4*lane:05b}", f"{4+4*lane:05b}"),
+            '    "//vsetvli     t4, a4, e16, m%i, d1"' % e16m,
+            '    ".word 0b01%s01110111111011010111"' % f"{eM[e16m]:02b}",
+        ]
+    elif vspec == "v1.0":
+        code += [
+            '    "vsetvli     t4,a4,e16,m%i,tu,mu"' % e16m,
+        ]
+    else:
+        assert False, "Unsupported vector extension version: `%s`" % vspec
+
+    for lane in range(0, n_lanes):
+        mvec = 16 + e16m * lane
+        rvec = 8 + e16m * lane
+        code += [
+            '    "vwredsum.vs v%i, v%i, v0"' % (rvec, mvec),
         ]
 
     # store lanes
@@ -88,17 +104,25 @@ def rvv071_dot_int8_kernel(output, n_macs, n_lanes, codegen="llvm"):
         '    /// store',
     ]
     for lane in range(0, n_lanes):
+        rvec = 8 + e16m * lane
+        if vspec == "v0.7.1":
+            code += [
+                '    "//vmv.x.s    t4, v%i"' % rvec,
+                '    ".word 0b000011001%s00000010111011010111"' % f"{rvec:05b}",
+            ]
+        elif vspec == "v1.0":
+            code += [
+                '    "vmv.x.s    t4, v%i"' % rvec,
+            ]
+        else:
+            assert False, "Unsupported vector extension version: `%s`" % vspec
         code += [
-            '    "//vmv.x.s    t4, v%i"' % (4+4*lane),
-            '    ".word 0b000011001%s00000010111011010111"' % f"{4+4*lane:05b}",
-            '    "//sw          t4, 0(%[outw])"',
-            '    ".word 0x01d52023"',
+            '    "sw          t4, 0(%[outw])"',
         ]
         if lane == n_lanes - 1:
             continue
         code += [
-            '    "//addi         %[outw], %[outw], 4"',
-            '    ".half 0x0511"',
+            '    "addi         %[outw], %[outw], 4"',
         ]
 
     # footer
@@ -131,6 +155,9 @@ def rvv071_dot_int8_kernel(output, n_macs, n_lanes, codegen="llvm"):
                 line += '\\n"'
             elif codegen == "llvm":
                 line = line.replace('"', "") + '\\0A'
+                line = line.replace('%[data]', "$0") + '\\0A'
+                line = line.replace('%[kern]', "$1") + '\\0A'
+                line = line.replace('%[outw]', "$2") + '\\0A'
         f.write(line + '\n')
     for line in tail:
         f.write(line + '\n')
@@ -149,6 +176,12 @@ def main():
         "--codegen", help="Codegen target", choices=["llvm", "c"], required=True
     )
     parser.add_argument(
+        "--vspec", help="Codegen target", choices=["v0.7.1", "v1.0"], required=True
+    )
+    parser.add_argument(
+        "--datatype", help="Data Type", choices=["int8", "fp16", "fp32"], required=True
+    )
+    parser.add_argument(
         "--lanes", type=int, choices=range(1, 5), metavar="1..4", default=4
     )
     parser.add_argument(
@@ -158,7 +191,7 @@ def main():
     args = parser.parse_args()
 
     # generate kernel
-    rvv071_dot_int8_kernel(args.output, args.elems, args.lanes, args.codegen)
+    rvv_dot_kernel(args.output, args.elems, args.lanes, args.datatype, args.codegen, args.vspec)
 
 
 if __name__ == "__main__":
