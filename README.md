@@ -56,7 +56,7 @@ RVV speed: 11.553 GOPS/sec
 ### Notes
 
   * This generator emmits C / LLVM-IR kernels, with encoded insn, thus making it RVV version agnostic
-  * T-Head 1520 (C906, also others) implements older v0.7.1 RVV vector ISA, now unsupported by LLVM upstream
+  * T-Head 1520 (C906, also others) implements older v0.7.1 RVV ISA, now unsupported by LLVM upstream
   * TH1520 ```setvli``` ASIC implementation is slow, see comments on a dynamic kernel: [trials/riscv-asm.c](trials/riscv-asm.c)
   * The ```setvli``` slowness issue force the SVE (scalable vector) concept to avoid frequent ```setvli``` calls
 
