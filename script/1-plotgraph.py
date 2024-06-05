@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 def get_cmap(n, name='hsv'):
     '''Returns a function that maps each index in 0, 1, ..., n-1 to a distinct 
     RGB color; the keyword argument name must be a standard mpl colormap name.'''
-    return plt.cm.get_cmap(name, n)
+    return plt.get_cmap(name, n)
 
 
 def main():
@@ -47,8 +47,8 @@ def main():
   plt.title(args.title)
   plt.xlabel('Elements')
   plt.ylabel('GOP/sec')
-  plt.yticks(np.arange(0, 1000, step=2))
-  plt.xticks(np.arange(0, 1000, step=4))
+  plt.yticks(np.arange(0, 1000, step=1))
+  plt.xticks(np.arange(0, 1000, step=2))
 
   # plot
   for lane in benchmarks.keys():

@@ -1,38 +1,36 @@
 #include <stdint.h>
 void __attribute__((noinline))
-dot_int8_kernel(int32_t* output,
-           const uint8_t* data,
-           const int8_t* kernel) {
+dot_fp32_kernel(float* output,
+           const float* data,
+           const float* kernel) {
   asm volatile (
     /// init
-    "li          a4, 32                           \n"
-    "li          a5, 32                           \n"
+    "li          a4, 4                            \n"
+    "li          a5, 16                           \n"
     /// load data
-    "//vsetvli     t4, a4, e8, m2, d1             \n"
-    ".word 0b000101110111111011010111             \n"
-    "vle8.v     v4, (%[data])                     \n"
+    "//vsetvli     t4, a4, e32, m4, d1            \n"
+    ".word 0b101001110111111011010111             \n"
+    "vle32.v     v4, (%[data])                    \n"
     /// mul lane 0
-    "vle8.v       v8, (%[kern])                   \n"
-    "vwmulsu.vv  v16, v8, v4                      \n"
+    "vle32.v       v8, (%[kern])                  \n"
+    "vfmul.vv  v16, v8, v4                        \n"
     "add         %[kern], %[kern], a5             \n"
     /// mul lane 1
-    "vle8.v       v8, (%[kern])                   \n"
-    "vwmulsu.vv  v20, v8, v4                      \n"
+    "vle32.v       v8, (%[kern])                  \n"
+    "vfmul.vv  v20, v8, v4                        \n"
     "add         %[kern], %[kern], a5             \n"
     /// mul lane 2
-    "vle8.v       v8, (%[kern])                   \n"
-    "vwmulsu.vv  v24, v8, v4                      \n"
+    "vle32.v       v8, (%[kern])                  \n"
+    "vfmul.vv  v24, v8, v4                        \n"
     "add         %[kern], %[kern], a5             \n"
     /// mul lane 3
-    "vle8.v       v8, (%[kern])                   \n"
-    "vwmulsu.vv  v28, v8, v4                      \n"
+    "vle32.v       v8, (%[kern])                  \n"
+    "vfmul.vv  v28, v8, v4                        \n"
     /// reduce
-    "//vsetvli     t4, a4, e16, m4, d1            \n"
-    ".word 0b011001110111111011010111             \n"
-    "vwredsum.vs v8, v16, v0                      \n"
-    "vwredsum.vs v12, v20, v0                     \n"
-    "vwredsum.vs v16, v24, v0                     \n"
-    "vwredsum.vs v20, v28, v0                     \n"
+    "vfredsum.vs v8, v16, v0                      \n"
+    "vfredsum.vs v12, v20, v0                     \n"
+    "vfredsum.vs v16, v24, v0                     \n"
+    "vfredsum.vs v20, v28, v0                     \n"
     /// store
     "//vmv.x.s    t4, v8                          \n"
     ".word 0b0000110010100000000010111011010111   \n"

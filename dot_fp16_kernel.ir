@@ -1,0 +1,49 @@
+define dso_local void @dot_fp16_kernel(ptr noundef %0, ptr noundef %1, ptr noundef %2) local_unnamed_addr #0 {
+tail call void asm sideeffect "
+    /// init
+    li          a4, 16                           \0A\0A\0A\0A
+    li          a5, 32                           \0A\0A\0A\0A
+    /// load data
+    //vsetvli     t4, a4, e16, m4, d1            \0A\0A\0A\0A
+    .word 0b011001110111111011010111             \0A\0A\0A\0A
+    vle16.v     v4, ($0)                    \0A\0A\0A\0A
+    /// mul lane 0
+    vle16.v       v8, ($1)                  \0A\0A\0A\0A
+    vfmul.vv  v16, v8, v4                        \0A\0A\0A\0A
+    add         $1, $1, a5             \0A\0A\0A\0A
+    /// mul lane 1
+    vle16.v       v8, ($1)                  \0A\0A\0A\0A
+    vfmul.vv  v20, v8, v4                        \0A\0A\0A\0A
+    add         $1, $1, a5             \0A\0A\0A\0A
+    /// mul lane 2
+    vle16.v       v8, ($1)                  \0A\0A\0A\0A
+    vfmul.vv  v24, v8, v4                        \0A\0A\0A\0A
+    add         $1, $1, a5             \0A\0A\0A\0A
+    /// mul lane 3
+    vle16.v       v8, ($1)                  \0A\0A\0A\0A
+    vfmul.vv  v28, v8, v4                        \0A\0A\0A\0A
+    /// reduce
+    vfredsum.vs v8, v16, v0                      \0A\0A\0A\0A
+    vfredsum.vs v12, v20, v0                     \0A\0A\0A\0A
+    vfredsum.vs v16, v24, v0                     \0A\0A\0A\0A
+    vfredsum.vs v20, v28, v0                     \0A\0A\0A\0A
+    /// store
+    //vmv.x.s    t4, v8                          \0A\0A\0A\0A
+    .word 0b0000110010100000000010111011010111   \0A\0A\0A\0A
+    sw          t4, 0($2)                   \0A\0A\0A\0A
+    addi         $2, $2, 2             \0A\0A\0A\0A
+    //vmv.x.s    t4, v12                         \0A\0A\0A\0A
+    .word 0b0000110010110000000010111011010111   \0A\0A\0A\0A
+    sw          t4, 0($2)                   \0A\0A\0A\0A
+    addi         $2, $2, 2             \0A\0A\0A\0A
+    //vmv.x.s    t4, v16                         \0A\0A\0A\0A
+    .word 0b0000110011000000000010111011010111   \0A\0A\0A\0A
+    sw          t4, 0($2)                   \0A\0A\0A\0A
+    addi         $2, $2, 2             \0A\0A\0A\0A
+    //vmv.x.s    t4, v20                         \0A\0A\0A\0A
+    .word 0b0000110011010000000010111011010111   \0A\0A\0A\0A
+    sw          t4, 0($2)                   \0A\0A\0A\0A
+    ",
+    "r,r,r" (ptr %1, ptr %2, ptr %0) #1
+    ret void
+}
