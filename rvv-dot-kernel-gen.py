@@ -47,7 +47,7 @@ def rvv_dot_kernel(output, n_elems, n_lanes, datatype="int8", codegen="llvm", vs
         ]
         if datatype == "int8":
             head += [
-                'dot_%s_kernel(int32_t* output,' % datatype,
+                'dot_%s_kernel(int16_t* output,' % datatype,
                 '           const uint8_t* data,',
                 '           const int8_t* kernel) {',
                 '  asm volatile (',
@@ -180,17 +180,26 @@ def rvv_dot_kernel(output, n_elems, n_lanes, datatype="int8", codegen="llvm", vs
             ]
         else:
             assert False, "Unsupported vector extension version: `%s`" % vspec
-        code += [
-            '    "sw          t4, 0(%[outw])"',
-        ]
+        if (datatype == "int8") or (datatype == "fp16"):
+            code += [
+                '    "sh          t4, 0(%[outw])"',
+          ]
+        elif datatype == "fp32":
+            code += [
+                '    "sw          t4, 0(%[outw])"',
+            ]
+        else:
+            assert False, "Unsupported data type: `%s`" % datatype
+
+        # stop condition
         if lane == n_lanes - 1:
             continue
 
-        if datatype == "fp16":
+        if (datatype == "int8") or (datatype == "fp16"):
             code += [
                 '    "addi         %[outw], %[outw], 2"',
             ]
-        elif (datatype == "int8") or (datatype == "fp32"):
+        elif datatype == "fp32":
             code += [
                 '    "addi         %[outw], %[outw], 4"',
             ]

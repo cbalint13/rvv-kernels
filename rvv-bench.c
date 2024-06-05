@@ -10,13 +10,13 @@
 #include <limits.h>
 #include <stdint.h>
 
-extern void dot_int8_kernel(int32_t* output, const uint8_t* data, const int8_t* kernel);
+extern void dot_int8_kernel(int16_t* output, const uint8_t* data, const int8_t* kernel);
 extern void dot_fp16_kernel(__fp16* output, const __fp16* data, const __fp16* kernel);
 extern void dot_fp32_kernel(float* output, const float* data, const float* kernel);
 
 /* naive dotprod kernel */
 #if DATA_TYPE == INT8
-uint64_t dot_sim(int32_t* output, const uint8_t* data, const int8_t* kernel) {
+uint64_t dot_sim(int16_t* output, const uint8_t* data, const int8_t* kernel) {
 #elif DATA_TYPE == FP16
 uint64_t dot_sim(__fp16* output, const __fp16* data, const __fp16* kernel) {
 #elif DATA_TYPE == FP32
@@ -41,7 +41,7 @@ uint64_t dot_sim(float* output, const float* data, const float* kernel) {
 
 /* debug result data */
 #if DATA_TYPE == INT8
-void data_dump(int32_t* output, uint64_t size) {
+void data_dump(int16_t* output, uint64_t size) {
 #elif DATA_TYPE == FP16
 void data_dump(__fp16* output, uint64_t size) {
 #elif DATA_TYPE == FP32
@@ -60,7 +60,7 @@ void data_dump(float* output, uint64_t size) {
   printf("  O[] =");
   for (unsigned i = 0; i < size; ++i) {
 #if DATA_TYPE == INT8
-    int32_t *buff = (int32_t *)output;
+    int16_t *buff = (int16_t *)output;
     printf(" %08i", buff[i]);
 #elif DATA_TYPE == FP16
     __fp16 *buff = (__fp16 *)output;
@@ -81,8 +81,8 @@ int main(int argc, char **argv) {
 #if DATA_TYPE == INT8
   uint8_t data[NUM_ELEMS];
   int8_t kernel[NUM_ELEMS*NUM_LANES];
-  int32_t output0[NUM_LANES];
-  int32_t output1[NUM_LANES];
+  int16_t output0[NUM_LANES];
+  int16_t output1[NUM_LANES];
 #elif DATA_TYPE == FP16
   __fp16 data[NUM_ELEMS];
   __fp16 kernel[NUM_ELEMS*NUM_LANES];

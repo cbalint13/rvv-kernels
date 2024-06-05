@@ -1,6 +1,6 @@
 #include <stdint.h>
 void __attribute__((noinline))
-dot_int8_kernel(int32_t* output,
+dot_int8_kernel(int16_t* output,
            const uint8_t* data,
            const int8_t* kernel) {
   asm volatile (
@@ -36,19 +36,19 @@ dot_int8_kernel(int32_t* output,
     /// store
     "//vmv.x.s    t4, v8                          \n"
     ".word 0b0000110010100000000010111011010111   \n"
-    "sw          t4, 0(%[outw])                   \n"
-    "addi         %[outw], %[outw], 4             \n"
+    "sh          t4, 0(%[outw])                   \n"
+    "addi         %[outw], %[outw], 2             \n"
     "//vmv.x.s    t4, v12                         \n"
     ".word 0b0000110010110000000010111011010111   \n"
-    "sw          t4, 0(%[outw])                   \n"
-    "addi         %[outw], %[outw], 4             \n"
+    "sh          t4, 0(%[outw])                   \n"
+    "addi         %[outw], %[outw], 2             \n"
     "//vmv.x.s    t4, v16                         \n"
     ".word 0b0000110011000000000010111011010111   \n"
-    "sw          t4, 0(%[outw])                   \n"
-    "addi         %[outw], %[outw], 4             \n"
+    "sh          t4, 0(%[outw])                   \n"
+    "addi         %[outw], %[outw], 2             \n"
     "//vmv.x.s    t4, v20                         \n"
     ".word 0b0000110011010000000010111011010111   \n"
-    "sw          t4, 0(%[outw])                   \n"
+    "sh          t4, 0(%[outw])                   \n"
     ::
       [data] "r" (data),
       [kern] "r" (kernel),

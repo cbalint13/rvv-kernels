@@ -32,19 +32,19 @@ tail call void asm sideeffect "
     /// store
     //vmv.x.s    t4, v8                          \0A\0A\0A\0A
     .word 0b0000110010100000000010111011010111   \0A\0A\0A\0A
-    sw          t4, 0($2)                   \0A\0A\0A\0A
-    addi         $2, $2, 4             \0A\0A\0A\0A
+    sh          t4, 0($2)                   \0A\0A\0A\0A
+    addi         $2, $2, 2             \0A\0A\0A\0A
     //vmv.x.s    t4, v12                         \0A\0A\0A\0A
     .word 0b0000110010110000000010111011010111   \0A\0A\0A\0A
-    sw          t4, 0($2)                   \0A\0A\0A\0A
-    addi         $2, $2, 4             \0A\0A\0A\0A
+    sh          t4, 0($2)                   \0A\0A\0A\0A
+    addi         $2, $2, 2             \0A\0A\0A\0A
     //vmv.x.s    t4, v16                         \0A\0A\0A\0A
     .word 0b0000110011000000000010111011010111   \0A\0A\0A\0A
-    sw          t4, 0($2)                   \0A\0A\0A\0A
-    addi         $2, $2, 4             \0A\0A\0A\0A
+    sh          t4, 0($2)                   \0A\0A\0A\0A
+    addi         $2, $2, 2             \0A\0A\0A\0A
     //vmv.x.s    t4, v20                         \0A\0A\0A\0A
     .word 0b0000110011010000000010111011010111   \0A\0A\0A\0A
-    sw          t4, 0($2)                   \0A\0A\0A\0A
+    sh          t4, 0($2)                   \0A\0A\0A\0A
     ",
     "r,r,r" (ptr %1, ptr %2, ptr %0) #1
     ret void
