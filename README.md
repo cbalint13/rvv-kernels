@@ -77,5 +77,6 @@ The maximum usable ```int8``` elements width is 32 for RVV 0.7.1 version.
 
 ### Changelog
 
+  * **16 Dec 2024** benchmark full int8/fp16/fp32 RVV v1.0 & v0.7.1
   * **06 Jun 2024** realease ```fp16``` & ```fp32``` for RVV 0.7.1 version
   * **13 Mar 2024** intial realease, for now ```int8``` with RVV 0.7.1 version
