@@ -5,9 +5,11 @@
 
 ### Benchmark
 
-![INT8-BENCHMARK](benchmark-int8.log.png)
-![FP16-BENCHMARK](benchmark-fp16.log.png)
-![FP32-BENCHMARK](benchmark-fp32.log.png)
+|                    XuanTie TH1520                       |                SpacemiT K1 X60                      |
+| ------------------------------------------------------- | --------------------------------------------------- |
+| ![INT8-v0.7.1-BENCHMARK](benchmark-v0.7.1-int8.log.png) | ![INT8-v1.0-BENCHMARK](benchmark-v1.0-int8.log.png) |
+| ![FP16-v0.7.1-BENCHMARK](benchmark-v0.7.1-fp16.log.png) | ![FP16-v1.0-BENCHMARK](benchmark-v1.0-fp16.log.png) |
+| ![FP32-v0.7.1-BENCHMARK](benchmark-v0.7.1-fp32.log.png) | ![FP32-v1.0-BENCHMARK](benchmark-v1.0-fp32.log.png) |
 
 ### Usage
 
